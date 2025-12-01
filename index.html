@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 30th Birthday Yomi! 🎉</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Slideshow Container -->
+    <div class="slideshow-container" id="slideshowContainer">
+        <!-- Hero/Welcome Slide -->
+        <div class="slide active" id="slide-0">
+            <div class="hero-content">
+                <div class="birthday-number">30</div>
+                <h1 class="hero-title">Happy Birthday Yomi!</h1>
+                <p class="hero-subtitle">Celebrating 30 Amazing Years</p>
+                <button class="cta-button" onclick="nextSlide()">Begin the Celebration</button>
+            </div>
+            <div class="floating-elements">
+                <div class="floating-balloon balloon-1">🎈</div>
+                <div class="floating-balloon balloon-2">🎈</div>
+                <div class="floating-balloon balloon-3">🎈</div>
+                <div class="floating-balloon balloon-4">🎈</div>
+            </div>
+        </div>
+        <!-- Wish slides will be dynamically added here -->
+    </div>
+
+    <!-- Navigation Controls -->
+    <button class="nav-button nav-prev" id="prevButton" onclick="previousSlide()" aria-label="Previous">
+        <span>&#10094;</span>
+    </button>
+    <button class="nav-button nav-next" id="nextButton" onclick="nextSlide()" aria-label="Next">
+        <span>&#10095;</span>
+    </button>
+
+    <!-- Slide Indicator -->
+    <div class="slide-indicator" id="slideIndicator">
+        <span id="currentSlide">1</span> / <span id="totalSlides">1</span>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
