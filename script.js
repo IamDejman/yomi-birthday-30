@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgressBar();
     updateNavigationButtons();
     
-    // Initialize music controls
+    // Initialize music controls and attempt autoplay
     const music = document.getElementById('backgroundMusic');
     const musicIcon = document.getElementById('musicIcon');
     
@@ -100,6 +100,27 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Set initial icon
         musicIcon.textContent = '🔇';
+        
+        // Attempt to autoplay music (may be blocked by browser)
+        attemptAutoplay();
+    }
+    
+    // Function to attempt autoplay
+    function attemptAutoplay() {
+        if (music && music.src) {
+            const playPromise = music.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Autoplay succeeded
+                    isMusicPlaying = true;
+                    musicIcon.textContent = '🎵';
+                }).catch((error) => {
+                    // Autoplay was prevented - will play on first user interaction
+                    console.log('Autoplay prevented. Music will play on user interaction.');
+                });
+            }
+        }
     }
     
     // Keyboard navigation
@@ -226,6 +247,19 @@ function createWishSlides() {
 
 // Navigate to next slide
 function nextSlide() {
+    // Try to start music on first user interaction (if autoplay was blocked)
+    if (!isMusicPlaying && currentSlide === 0) {
+        const music = document.getElementById('backgroundMusic');
+        if (music && music.src) {
+            music.play().then(() => {
+                isMusicPlaying = true;
+                document.getElementById('musicIcon').textContent = '🎵';
+            }).catch(() => {
+                // Music will need manual play
+            });
+        }
+    }
+    
     if (currentSlide < totalSlides - 1) {
         goToSlide(currentSlide + 1);
     }
