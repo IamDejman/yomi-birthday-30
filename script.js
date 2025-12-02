@@ -101,25 +101,31 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set initial icon
         musicIcon.textContent = '🔇';
         
+        // Load the audio source
+        music.load();
+        
         // Attempt to autoplay music (may be blocked by browser)
         attemptAutoplay();
     }
     
     // Function to attempt autoplay
     function attemptAutoplay() {
-        if (music && music.src) {
-            const playPromise = music.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    // Autoplay succeeded
-                    isMusicPlaying = true;
-                    musicIcon.textContent = '🎵';
-                }).catch((error) => {
-                    // Autoplay was prevented - will play on first user interaction
-                    console.log('Autoplay prevented. Music will play on user interaction.');
-                });
-            }
+        if (music) {
+            // Wait a bit for the audio to load
+            setTimeout(() => {
+                const playPromise = music.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        // Autoplay succeeded
+                        isMusicPlaying = true;
+                        musicIcon.textContent = '🎵';
+                    }).catch((error) => {
+                        // Autoplay was prevented - will play on first user interaction
+                        console.log('Autoplay prevented. Music will play on user interaction.');
+                    });
+                }
+            }, 100);
         }
     }
     
@@ -250,12 +256,14 @@ function nextSlide() {
     // Try to start music on first user interaction (if autoplay was blocked)
     if (!isMusicPlaying && currentSlide === 0) {
         const music = document.getElementById('backgroundMusic');
-        if (music && music.src) {
+        if (music) {
+            music.load();
             music.play().then(() => {
                 isMusicPlaying = true;
                 document.getElementById('musicIcon').textContent = '🎵';
-            }).catch(() => {
-                // Music will need manual play
+            }).catch((error) => {
+                // Music will need manual play - don't show error
+                console.log('Music play on interaction failed:', error);
             });
         }
     }
@@ -371,9 +379,14 @@ function toggleMusic() {
     const music = document.getElementById('backgroundMusic');
     const musicIcon = document.getElementById('musicIcon');
     
-    if (music.src === '' || !music.src) {
-        // If no music file is set, show alert
-        alert('Please add a music file to the audio element in index.html');
+    if (!music) {
+        console.error('Music element not found');
+        return;
+    }
+    
+    // Check if audio has a valid source by checking if it can load
+    if (!music.src && music.children.length === 0) {
+        console.error('No music source found');
         return;
     }
     
@@ -382,12 +395,14 @@ function toggleMusic() {
         musicIcon.textContent = '🔇';
         isMusicPlaying = false;
     } else {
+        // Load the audio first if needed
+        music.load();
         music.play().then(() => {
             musicIcon.textContent = '🎵';
             isMusicPlaying = true;
         }).catch((error) => {
             console.error('Error playing music:', error);
-            alert('Could not play music. Please check if the file exists and is supported.');
+            // Don't show alert, just log the error
         });
     }
 }
