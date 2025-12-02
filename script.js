@@ -136,60 +136,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Keyboard navigation
     document.addEventListener('keydown', handleKeyboardNavigation);
     
-    // Touch swipe support (improved for mobile)
+    // Touch swipe support (simplified and smoother)
     let touchStartX = 0;
     let touchStartY = 0;
     let touchEndX = 0;
     let touchEndY = 0;
-    let isSwiping = false;
     
     document.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
-        isSwiping = true;
         pauseAutoAdvance();
     }, { passive: true });
     
-    document.addEventListener('touchmove', (e) => {
-        // Allow scrolling but detect horizontal swipes
-        if (isSwiping) {
-            const currentX = e.changedTouches[0].screenX;
-            const currentY = e.changedTouches[0].screenY;
-            const diffX = Math.abs(currentX - touchStartX);
-            const diffY = Math.abs(currentY - touchStartY);
-            
-            // If horizontal movement is greater than vertical, prevent scrolling
-            if (diffX > diffY && diffX > 10) {
-                e.preventDefault();
-            }
-        }
-    }, { passive: false });
-    
     document.addEventListener('touchend', (e) => {
-        if (isSwiping) {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
-            isSwiping = false;
-        }
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
     }, { passive: true });
     
     function handleSwipe() {
-        const swipeThreshold = 50;
+        const swipeThreshold = 75; // Increased threshold for more intentional swipes
         const diffX = touchStartX - touchEndX;
         const diffY = Math.abs(touchStartY - touchEndY);
         
-        // Only trigger if horizontal swipe is dominant
-        if (Math.abs(diffX) > swipeThreshold && Math.abs(diffX) > diffY) {
+        // Only trigger if horizontal swipe is significant and dominant over vertical
+        if (Math.abs(diffX) > swipeThreshold && Math.abs(diffX) > diffY * 1.5) {
             if (diffX > 0) {
                 nextSlide(); // Swipe left - next
             } else {
                 previousSlide(); // Swipe right - previous
             }
+        } else {
+            // Resume auto-advance if it wasn't a swipe
+            resumeAutoAdvanceAfterDelay();
         }
-        
-        // Resume auto-advance after user interaction
-        resumeAutoAdvanceAfterDelay();
     }
     
     // Start auto-advance
