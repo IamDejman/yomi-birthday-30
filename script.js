@@ -69,6 +69,10 @@ function createConfetti() {
 let currentSlide = 0;
 let totalSlides = 1; // Start with 1 (hero slide)
 let slides = [];
+let autoAdvanceTimer = null;
+let autoAdvanceDelay = 10000; // 10 seconds per slide
+let isAutoAdvanceActive = true;
+let userInteractionTimeout = null;
 
 // Initialize the slideshow
 document.addEventListener('DOMContentLoaded', () => {
@@ -132,31 +136,64 @@ document.addEventListener('DOMContentLoaded', () => {
     // Keyboard navigation
     document.addEventListener('keydown', handleKeyboardNavigation);
     
-    // Touch swipe support
+    // Touch swipe support (improved for mobile)
     let touchStartX = 0;
+    let touchStartY = 0;
     let touchEndX = 0;
+    let touchEndY = 0;
+    let isSwiping = false;
     
     document.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
-    });
+        touchStartY = e.changedTouches[0].screenY;
+        isSwiping = true;
+        pauseAutoAdvance();
+    }, { passive: true });
+    
+    document.addEventListener('touchmove', (e) => {
+        // Allow scrolling but detect horizontal swipes
+        if (isSwiping) {
+            const currentX = e.changedTouches[0].screenX;
+            const currentY = e.changedTouches[0].screenY;
+            const diffX = Math.abs(currentX - touchStartX);
+            const diffY = Math.abs(currentY - touchStartY);
+            
+            // If horizontal movement is greater than vertical, prevent scrolling
+            if (diffX > diffY && diffX > 10) {
+                e.preventDefault();
+            }
+        }
+    }, { passive: false });
     
     document.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    });
+        if (isSwiping) {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+            isSwiping = false;
+        }
+    }, { passive: true });
     
     function handleSwipe() {
         const swipeThreshold = 50;
-        const diff = touchStartX - touchEndX;
+        const diffX = touchStartX - touchEndX;
+        const diffY = Math.abs(touchStartY - touchEndY);
         
-        if (Math.abs(diff) > swipeThreshold) {
-            if (diff > 0) {
+        // Only trigger if horizontal swipe is dominant
+        if (Math.abs(diffX) > swipeThreshold && Math.abs(diffX) > diffY) {
+            if (diffX > 0) {
                 nextSlide(); // Swipe left - next
             } else {
                 previousSlide(); // Swipe right - previous
             }
         }
+        
+        // Resume auto-advance after user interaction
+        resumeAutoAdvanceAfterDelay();
     }
+    
+    // Start auto-advance
+    startAutoAdvance();
 });
 
 // Create individual photo slide (one photo per slide, full screen)
@@ -251,6 +288,38 @@ function createWishSlides() {
     slides = document.querySelectorAll('.slide');
 }
 
+// Auto-advance functions
+function startAutoAdvance() {
+    if (!isAutoAdvanceActive) return;
+    
+    clearTimeout(autoAdvanceTimer);
+    autoAdvanceTimer = setTimeout(() => {
+        if (currentSlide < totalSlides - 1) {
+            nextSlide();
+        } else {
+            // Loop back to beginning or stop
+            // goToSlide(0); // Uncomment to loop
+        }
+    }, autoAdvanceDelay);
+}
+
+function pauseAutoAdvance() {
+    clearTimeout(autoAdvanceTimer);
+    isAutoAdvanceActive = false;
+}
+
+function resumeAutoAdvance() {
+    isAutoAdvanceActive = true;
+    startAutoAdvance();
+}
+
+function resumeAutoAdvanceAfterDelay(delay = 5000) {
+    clearTimeout(userInteractionTimeout);
+    userInteractionTimeout = setTimeout(() => {
+        resumeAutoAdvance();
+    }, delay);
+}
+
 // Navigate to next slide
 function nextSlide() {
     // Try to start music on first user interaction (if autoplay was blocked)
@@ -268,16 +337,28 @@ function nextSlide() {
         }
     }
     
+    // Pause auto-advance on manual navigation
+    pauseAutoAdvance();
+    
     if (currentSlide < totalSlides - 1) {
         goToSlide(currentSlide + 1);
     }
+    
+    // Resume auto-advance after delay
+    resumeAutoAdvanceAfterDelay();
 }
 
 // Navigate to previous slide
 function previousSlide() {
+    // Pause auto-advance on manual navigation
+    pauseAutoAdvance();
+    
     if (currentSlide > 0) {
         goToSlide(currentSlide - 1);
     }
+    
+    // Resume auto-advance after delay
+    resumeAutoAdvanceAfterDelay();
 }
 
 // Go to specific slide
@@ -315,6 +396,11 @@ function goToSlide(index) {
     
     // Scroll to top of slide
     nextSlideElement.scrollTop = 0;
+    
+    // Restart auto-advance timer for new slide
+    if (isAutoAdvanceActive) {
+        startAutoAdvance();
+    }
 }
 
 // Update slide indicator
@@ -349,6 +435,9 @@ function updateNavigationButtons() {
 
 // Handle keyboard navigation
 function handleKeyboardNavigation(e) {
+    // Pause auto-advance on keyboard interaction
+    pauseAutoAdvance();
+    
     switch(e.key) {
         case 'ArrowRight':
         case 'ArrowDown':
@@ -364,10 +453,12 @@ function handleKeyboardNavigation(e) {
         case 'Home':
             e.preventDefault();
             goToSlide(0);
+            resumeAutoAdvanceAfterDelay();
             break;
         case 'End':
             e.preventDefault();
             goToSlide(totalSlides - 1);
+            resumeAutoAdvanceAfterDelay();
             break;
     }
 }
