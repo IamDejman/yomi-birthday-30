@@ -356,6 +356,47 @@ body {
     transition: width 0.3s ease;
 }
 
+/* Music Control Button */
+.music-control {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.music-control:hover {
+    background: rgba(255, 107, 157, 0.3);
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+}
+
+.music-control:active {
+    transform: scale(0.95);
+}
+
+.music-icon {
+    display: block;
+    line-height: 1;
+}
+
 /* Animations */
 @keyframes fadeInUp {
     from {
@@ -468,6 +509,14 @@ body {
         font-size: 1rem;
         min-height: 44px;
     }
+
+    .music-control {
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -534,6 +583,14 @@ body {
     .wish-slide-content {
         gap: 1.5rem;
         padding: 0.75rem;
+    }
+
+    .music-control {
+        top: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
     }
 }
 

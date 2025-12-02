@@ -78,6 +78,30 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgressBar();
     updateNavigationButtons();
     
+    // Initialize music controls
+    const music = document.getElementById('backgroundMusic');
+    const musicIcon = document.getElementById('musicIcon');
+    
+    if (music) {
+        music.addEventListener('play', () => {
+            musicIcon.textContent = '🎵';
+            isMusicPlaying = true;
+        });
+        
+        music.addEventListener('pause', () => {
+            musicIcon.textContent = '🔇';
+            isMusicPlaying = false;
+        });
+        
+        music.addEventListener('ended', () => {
+            musicIcon.textContent = '🔇';
+            isMusicPlaying = false;
+        });
+        
+        // Set initial icon
+        musicIcon.textContent = '🔇';
+    }
+    
     // Keyboard navigation
     document.addEventListener('keydown', handleKeyboardNavigation);
     
@@ -305,3 +329,32 @@ function handleKeyboardNavigation(e) {
             break;
     }
 }
+
+// Background Music Controls
+let isMusicPlaying = false;
+
+function toggleMusic() {
+    const music = document.getElementById('backgroundMusic');
+    const musicIcon = document.getElementById('musicIcon');
+    
+    if (music.src === '' || !music.src) {
+        // If no music file is set, show alert
+        alert('Please add a music file to the audio element in index.html');
+        return;
+    }
+    
+    if (isMusicPlaying) {
+        music.pause();
+        musicIcon.textContent = '🔇';
+        isMusicPlaying = false;
+    } else {
+        music.play().then(() => {
+            musicIcon.textContent = '🎵';
+            isMusicPlaying = true;
+        }).catch((error) => {
+            console.error('Error playing music:', error);
+            alert('Could not play music. Please check if the file exists and is supported.');
+        });
+    }
+}
+
